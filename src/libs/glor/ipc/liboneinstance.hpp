@@ -14,11 +14,17 @@
 #include <boost/date_time/posix_time/posix_time.hpp>
 
 #include <unistd.h>
-#include <pwd.h>
+
+#if defined _WIN32
+	#include <windows.h>
+#else
+	#include <pwd.h>
+#endif
+
 
 #include <glor/ipc/msg_mutex.hpp>
 
-#define _info(X) do { std::cerr<<getpid()<<"/"<<(std::this_thread::get_id())<<" "<<X<<std::endl; } while(0)
+//#define _info(X) do { std::cerr<<getpid()<<"/"<<(std::this_thread::get_id())<<" "<<X<<std::endl; } while(0)
 
 namespace nOneInstance {
 
@@ -105,7 +111,7 @@ class cInstanceObject {
 
 		bool PingInstance(const std::string &base_name,  const boost::interprocess::permissions & permissions); ///< tries to ping instance called base_name. Will create ping object with given permissions
 
-		std::string GetUserName() const;
+		std::string GetUserNameStr() const;
 		std::string GetDirName() const;
 
 		std::string GetProcessIdentification() const;

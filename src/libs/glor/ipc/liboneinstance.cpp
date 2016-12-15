@@ -14,11 +14,10 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <unistd.h>
-#include <pwd.h>
-
 #include <glor/ipc/liboneinstance.hpp>
 #include <glor/system/libsimpleconvert.hpp>
+
+#include "liboneinstance.hpp"
 
 // minor version (implementation) - number
 #define nOneInstance_library_version_minor 2
@@ -31,6 +30,37 @@
 
 namespace nOneInstance {
 
+	
+typedef std::string utf8;
+// TODO !!! mv function
+void wstrToUtf8(utf8 &dest, const std::wstring& src){
+    dest.clear();
+    for (size_t i = 0; i < src.size(); i++){
+        wchar_t w = src[i];
+        if (w <= 0x7f)
+            dest.push_back((char)w);
+        else if (w <= 0x7ff){
+            dest.push_back(0xc0 | ((w >> 6)& 0x1f));
+            dest.push_back(0x80| (w & 0x3f));
+        }
+#if MARKUP_SIZEOFWCHAR > 2
+        else if (w <= 0xffff){
+            dest.push_back(0xe0 | ((w >> 12)& 0x0f));
+            dest.push_back(0x80| ((w >> 6) & 0x3f));
+            dest.push_back(0x80| (w & 0x3f));
+        }
+        else if (w <= 0x10ffff){
+            dest.push_back(0xf0 | ((w >> 18)& 0x07));
+            dest.push_back(0x80| ((w >> 12) & 0x3f));
+            dest.push_back(0x80| ((w >> 6) & 0x3f));
+            dest.push_back(0x80| (w & 0x3f));
+        }
+#endif
+        else
+            dest.push_back('?');
+    }
+}
+	
 std::string GetLibraryVersionFull() {
 	return "TODO"; // TODO
 }
@@ -280,7 +310,7 @@ t_instance_outcome cInstanceObject::TryToBecomeInstance(int inst) { // test inst
 
 	const std::string igrp_name = std::string("instancegroup_") 
 		+ m_program_name // testprogram
-		+ ( (m_range==e_range_user) ? ("_user_n_"+cMyNamedMutex::EscapeMutexNameWithLen(GetUserName())) : ( "_user_ANY" ) ) // testprogram_alice  testprogram
+		+ ( (m_range==e_range_user) ? ("_user_n_"+cMyNamedMutex::EscapeMutexNameWithLen(GetUserNameStr())) : ( "_user_ANY" ) ) // testprogram_alice  testprogram
 		+ ( (m_range==e_range_maindir) ? ("_dir_n_"+cMyNamedMutex::EscapeMutexNameWithLen(GetDirName())) : ( "_dir_ANY" )   )
 	;
 
@@ -326,13 +356,27 @@ t_instance_outcome cInstanceObject::TryToBecomeInstance(int inst) { // test inst
 	return e_instance_i_lost;
 }
 
-std::string cInstanceObject::GetUserName() const {
+std::string cInstanceObject::GetUserNameStr() const {
+#if defined _WIN32
+  utf8 username;
+  const DWORD w_name_size = 256;
+  LPDWORD lp_name_size = new DWORD;
+  *lp_name_size = 256;
+  wchar_t *w_name;//[w_name_size];
+  w_name = new wchar_t[w_name_size];
+  GetUserName(reinterpret_cast<LPSTR>(w_name), lp_name_size);
+  wstrToUtf8(username, std::wstring(w_name));
+  delete [] w_name;
+  delete lp_name_size;
+  return username;
+#else
   uid_t uid = geteuid ();
 	struct passwd *pw = getpwuid (uid);
   if (pw) {
   	return pw->pw_name; // TODO escape characters
 	}
 	return "UNKNOWN";
+#endif
 }
 
 std::string cInstanceObject::GetDirName() const {

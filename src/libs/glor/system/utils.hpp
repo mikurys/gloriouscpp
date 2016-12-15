@@ -41,7 +41,7 @@
 #include <boost/interprocess/ipc/message_queue.hpp>
 #include <sstream>
 #include <algorithm> // replace
-
+#include <mutex>
 namespace glor {
 
 namespace system {
@@ -585,6 +585,19 @@ map<TK,TV> operator+(const map<TK,TV> &a, const map<TK,TV> &b) {
 // ====================================================================
 // ====================================================================
 
+
+// ====================================================================
+// Multi-threading
+#define USE_GLOR_SYS_PROTECT_CTIME_LOCK extern std::mutex g_protect_ctime_unsafe_functions
+#define GLOR_SYS_PROTECT_CTIME_LOCK g_protect_ctime_unsafe_functions.lock(); do { } while(0) 
+#define GLOR_SYS_PROTECT_CTIME_UNLOCK g_protect_ctime_unsafe_functions.unlock(); do { } while(0)
+
+#ifndef BOOST_HAS_THREADS
+	#define GLOR_SYS_CONFIG_CTIME_NEEDS_LOCKING
+#endif
+// ====================================================================
+
+std::string libglorious_info();
 
 /**
 @brief Special type that on creation will be initialized to have value INIT given as template argument. 

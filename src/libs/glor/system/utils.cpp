@@ -322,7 +322,7 @@ void cLoggerStream::Print(const std::string & str) {
 	else {
 		std::replace(m_filename.begin(), m_filename.end(), cFilesystemUtils::GetDirSeparatorSys(), '+');
 		m_msg_queue.reset(new boost::interprocess::message_queue(boost::interprocess::open_or_create, m_filename.c_str(), m_max_queue_size, m_max_message_size));
-		m_msg_queue->send(str.data(), str.size(), 0);
+		m_msg_queue->try_send(str.data(), str.size(), 0);
 	}
 }
 // ====================================================================
@@ -446,7 +446,7 @@ void cLogger::OpenNewChannel_(const std::string & channel) { // channel=="net/sl
 //    	cerr << "====== Log opened: " << fname_system << " (in " << ((void*)thefile) << ") ======" << endl;
   	_dbg_dbg( "====== Log opened: " << fname_system << " (in " << ((void*)thefile) << ") ======" );
 	mChannels.insert( std::pair<string,cLoggerStream*>(channel , thefile ) ); // <- created the channel mapping
-	mMainMsgQueue.send(fname_system.data(), fname_system.size(), 0);
+	mMainMsgQueue.try_send(fname_system.data(), fname_system.size(), 0);
 }
 
 cLoggerStream & cLogger::SelectOutput(int level, const std::string & channel) noexcept {
@@ -825,6 +825,18 @@ string stringToColor(const string &hash) {
 // ====================================================================
 // algorthms
 
+// ====================================================================
+// Multi-threading
+
+// ====================================================================
+
+std::string libglorious_info() {
+	std::string ret;
+	#ifdef GLOR_SYS_CONFIG_CTIME_NEEDS_LOCKING 
+		ret += "ctime needs locking protection";
+	#endif
+	return ret;
+}
 
 } // namespace nUtil
 
@@ -844,4 +856,4 @@ std::string GetObjectName() {
 // ====================================================================
 
 glor::system::cLogger gCurrentLogger;
-
+std::mutex g_protect_ctime_unsafe_functions;
