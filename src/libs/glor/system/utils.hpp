@@ -148,7 +148,9 @@ extern const int _debug_level_nr_dbg2;
 extern const int _debug_level_nr_dbg1;
 extern const int _debug_level_nr_info;
 extern const int _debug_level_nr_note;
+extern const int _debug_level_nr_stat;
 extern const int _debug_level_nr_fact;
+extern const int _debug_level_nr_goal;
 extern const int _debug_level_nr_mark;
 extern const int _debug_level_nr_warn;
 extern const int _debug_level_nr_erro;
@@ -158,8 +160,10 @@ extern const int _debug_level_nr_erro;
 #define _dbg1(VAR) _debug_level( glor::system::_debug_level_nr_dbg1,VAR) // details - more important
 #define _info(VAR) _debug_level( glor::system::_debug_level_nr_info,VAR) // information
 #define _note(VAR) _debug_level( glor::system::_debug_level_nr_note,VAR) // more interesting information
+#define _stat(VAR) _debug_level( glor::system::_debug_level_nr_stat,VAR) // statistics, that could be interesting to user a bit
 #define _fact(VAR) _debug_level( glor::system::_debug_level_nr_fact,VAR) // interesting events that could be interesting even for user, for logical/business things
-#define _mark(VAR) _debug_level( glor::system::_debug_level_nr_mark,VAR) // marked actions
+#define _goal(VAR) _debug_level( glor::system::_debug_level_nr_goal,VAR) // interesting events that are very intersting for user, e.g. are goal of the program
+#define _mark(VAR) _debug_level( glor::system::_debug_level_nr_mark,VAR) // marked actions (e.g. for developer)
 #define _warn(VAR) _debug_level( glor::system::_debug_level_nr_warn,VAR) // some problems
 #define _erro(VAR) _debug_level( glor::system::_debug_level_nr_erro,VAR) // errors
 
@@ -168,8 +172,10 @@ extern const int _debug_level_nr_erro;
 #define _dbg1_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_dbg1, VAR) // details - more important
 #define _info_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_info, VAR) // information
 #define _note_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_note, VAR) // more interesting information
+#define _stat_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_stat, VAR)
 #define _fact_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_fact, VAR) // interesting events that could be interesting even for user, for logical/business things
-#define _mark_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_mark, VAR) // marked actions
+#define _goal(VAR) _debug_level( glor::system::_debug_level_nr_goal,VAR) // interesting events that are very intersting for user, e.g. are goal of the program
+#define _mark_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_mark, VAR) // marked actions (e.g. for developer)
 #define _warn_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_warn, VAR) // some problems
 #define _erro_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_erro, VAR) // errors
 
@@ -186,18 +192,20 @@ extern const int _debug_level_nr_erro;
 
 #define _scope_dbg1(VAR) _scope_debug_level( _debug_level_nr_dbg3, VAR)
 #define _scope_dbg2(VAR) _scope_debug_level( _debug_level_nr_dbg2, VAR)
-#define _scope_dbg3(VAR) _scope_debug_level( _debug_level_nr_dbg1, VAR) 
-#define _scope_info(VAR) _scope_debug_level( _debug_level_nr_info, VAR) 
-#define _scope_note(VAR) _scope_debug_level( _debug_level_nr_note, VAR) 
-#define _scope_fact(VAR) _scope_debug_level( _debug_level_nr_fact, VAR) 
-#define _scope_mark(VAR) _scope_debug_level( _debug_level_nr_mark, VAR) 
-#define _scope_warn(VAR) _scope_debug_level( _debug_level_nr_warn, VAR) 
-#define _scope_erro(VAR) _scope_debug_level( _debug_level_nr_erro, VAR) 
+#define _scope_dbg3(VAR) _scope_debug_level( _debug_level_nr_dbg1, VAR)
+#define _scope_info(VAR) _scope_debug_level( _debug_level_nr_info, VAR)
+#define _scope_note(VAR) _scope_debug_level( _debug_level_nr_note, VAR)
+#define _scope_stat(VAR) _scope_debug_level( _debug_level_nr_stat, VAR)
+#define _scope_fact(VAR) _scope_debug_level( _debug_level_nr_fact, VAR)
+#define _scope_goal(VAR) _scope_debug_level( _debug_level_nr_goal, VAR)
+#define _scope_mark(VAR) _scope_debug_level( _debug_level_nr_mark, VAR)
+#define _scope_warn(VAR) _scope_debug_level( _debug_level_nr_warn, VAR)
+#define _scope_erro(VAR) _scope_debug_level( _debug_level_nr_erro, VAR)
 
 /***
 @brief do not use this namespace directly, it is implementation detail.
 */
-namespace nDetail { 
+namespace nDetail {
 
 /***
 @brief a Debug scope-guard, to log a debug message when current scope is left. Do NOT use this directly,
@@ -222,9 +230,9 @@ const char* DbgShortenCodeFileName(const char *s); ///< Returns a pointer to som
 
 class cLoggerStream;
 
-/*** 
+/***
 @brief Class to write debug into. Used it by calling the debug macros _dbg1(...) _info(...) _erro(...) etc, NOT directly!
-@author rfree (maintainer) 
+@author rfree (maintainer)
 @thread this class is NOT thread safe and must used only by one thread at once (use it via ot_debug_macros like _info macro they do proper locking)
 */
 class cLogger {
@@ -244,7 +252,7 @@ class cLogger {
 	protected:
 		bool mUseRegularFiles;
 		boost::interprocess::message_queue mMainMsgQueue;
-		
+
 		typedef long int t_anypid; // a portable representation of PID. long int should cover all platforms
 
 		void SetStreamBroken(); ///< call in case of internal error in logger (e.g. can not open a file)
@@ -499,14 +507,13 @@ class cLoggerStream {
 };
 
 class cLoggerStreamEmpty : public cLoggerStream {
-	
 	public :
 		cLoggerStreamEmpty() = default;
-		template <class T> cLoggerStream& operator << ( const T & obj) {
+		template <class T> cLoggerStream& operator << ( const T & ) {
 			return *this;
 		}
-		
-		template <class T> cLoggerStream& operator << ( const cLoggerCommit & obj) { 
+
+		template <class T> cLoggerStream& operator << ( const cLoggerCommit & ) {
 			return *this;
 		}
 };
@@ -553,7 +560,7 @@ vector<T> operator+(const T &a, const vector<T> &b) {
 
 template <class T>
 vector<T> operator+(const vector<T> &a, const T &b) {
-	vector<T> b_vector(1,a);
+	vector<T> b_vector(1,b);
 	return a + b_vector;
 }
 

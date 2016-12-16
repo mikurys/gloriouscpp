@@ -54,10 +54,12 @@ const int _debug_level_nr_dbg2=30;
 const int _debug_level_nr_dbg1=40;
 const int _debug_level_nr_info=50;
 const int _debug_level_nr_note=60;
-const int _debug_level_nr_fact=75;
-const int _debug_level_nr_mark=80;
-const int _debug_level_nr_warn=90;
-const int _debug_level_nr_erro=100;
+const int _debug_level_nr_stat=80;
+const int _debug_level_nr_fact=100;
+const int _debug_level_nr_goal=120;
+const int _debug_level_nr_mark=150;
+const int _debug_level_nr_warn=200;
+const int _debug_level_nr_erro=230;
 
 // ====================================================================
 
@@ -298,7 +300,7 @@ void cLoggerStream::UseRegularFiles() {
 	m_use_regular_files = true;
 }
 
-cLoggerStream& cLoggerStream::operator << ( const cLoggerCommit & obj) {
+cLoggerStream& cLoggerStream::operator << ( const cLoggerCommit & ) {
 	
 	if (! m_oss) m_oss.reset(new std::ostringstream);
 
@@ -384,13 +386,13 @@ cLoggerStream & cLogger::write_stream(int level, const std::string & channel ) {
 		if (mStream) { // TODO now disabling mStream also disables writting to any channel
 			_dbg_dbg("Selecting output...");
 			cLoggerStream & output = SelectOutput(level,channel);
-			_dbg_dbg("Selecting output... done, output=" << (void*)(&output));
+            std::thread::id this_id = std::this_thread::get_id();
+            output << "{" << Thread2Number(this_id) << "}";
+            _dbg_dbg("Selecting output... done, output=" << (void*)(&output));
 			#if defined(OS_TYPE_WINDOWS)
 			output << windows_stream(level);
 			#endif
 			output << icon(level) << ' ';
-			std::thread::id this_id = std::this_thread::get_id();
-			output << "{" << Thread2Number(this_id) << "}";
 			auto nicePid = Pid2Number(getpid());
 			if (nicePid>0) output << " {p" << nicePid << "}";
 			output << ' ';
@@ -449,7 +451,7 @@ void cLogger::OpenNewChannel_(const std::string & channel) { // channel=="net/sl
 	mMainMsgQueue.try_send(fname_system.data(), fname_system.size(), 0);
 }
 
-cLoggerStream & cLogger::SelectOutput(int level, const std::string & channel) noexcept {
+cLoggerStream & cLogger::SelectOutput(int , const std::string & channel) noexcept {
 	try {
 		if (mIsBroken) { 
 			_dbg_dbg("The stream is broken mIsBroken="<<mIsBroken<<" so will return backup stream");
@@ -687,7 +689,7 @@ void Assert(bool result, const std::string &stamp, const std::string &condition)
 // ====================================================================
 // advanced string
 
-const std::string GetMultiline(string endLine) {
+const std::string GetMultiline(string ) {
 	std::string result(""); // Taken from OT_CLI_ReadUntilEOF
 	while (true) {
 		std::string input_line("");
