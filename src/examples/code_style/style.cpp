@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <thread>
 
 #include <glor/system/utils.hpp>
 
@@ -18,7 +19,7 @@ class c_human : public c_entity { } ;
 int global_now_time; // but better to not use global
 
 class c_man : public c_human {
-	private:
+    public:
 		void foo();
 		void bar(int x, int y);
 
@@ -76,5 +77,26 @@ void test() {
 
 
 int main() {
+    glor::example::c_man jacek("Jacek");
+    std::thread t1([&jacek](){jacek.bar(10, 15);});
+    std::thread t2([](){_mark("This is mark");});
+    std::thread t3([](){_info("This is info");});
+    std::thread t4([](){_warn("This is warn");});
+    std::thread t5([](){_erro("This is erro");});
+    std::thread t6([](){_fact("This is fact");});
+    std::thread t7([](){_note("This is note");});
+    std::thread t8([](){_dbg1("This is dbg1");});
+    std::thread t9([](){_dbg2("This is dbg2");});
+    std::thread t10([](){_dbg3("This is dbg3");});
+    t10.join();
+    t9.join();
+    t8.join();
+    t7.join();
+    t6.join();
+    t5.join();
+    t4.join();
+    t3.join();
+    t1.join();
+    t2.join();
 	return 0;
 }
