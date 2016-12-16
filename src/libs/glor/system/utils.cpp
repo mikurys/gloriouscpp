@@ -54,10 +54,12 @@ const int _debug_level_nr_dbg2=30;
 const int _debug_level_nr_dbg1=40;
 const int _debug_level_nr_info=50;
 const int _debug_level_nr_note=60;
-const int _debug_level_nr_fact=75;
-const int _debug_level_nr_mark=80;
-const int _debug_level_nr_warn=90;
-const int _debug_level_nr_erro=100;
+const int _debug_level_nr_stat=80;
+const int _debug_level_nr_fact=100;
+const int _debug_level_nr_goal=120;
+const int _debug_level_nr_mark=150;
+const int _debug_level_nr_warn=200;
+const int _debug_level_nr_erro=230;
 
 // ====================================================================
 
