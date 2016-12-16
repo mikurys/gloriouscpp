@@ -298,7 +298,7 @@ void cLoggerStream::UseRegularFiles() {
 	m_use_regular_files = true;
 }
 
-cLoggerStream& cLoggerStream::operator << ( const cLoggerCommit & obj) {
+cLoggerStream& cLoggerStream::operator << ( const cLoggerCommit & ) {
 	
 	if (! m_oss) m_oss.reset(new std::ostringstream);
 
@@ -449,7 +449,7 @@ void cLogger::OpenNewChannel_(const std::string & channel) { // channel=="net/sl
 	mMainMsgQueue.try_send(fname_system.data(), fname_system.size(), 0);
 }
 
-cLoggerStream & cLogger::SelectOutput(int level, const std::string & channel) noexcept {
+cLoggerStream & cLogger::SelectOutput(int , const std::string & channel) noexcept {
 	try {
 		if (mIsBroken) { 
 			_dbg_dbg("The stream is broken mIsBroken="<<mIsBroken<<" so will return backup stream");
@@ -687,7 +687,7 @@ void Assert(bool result, const std::string &stamp, const std::string &condition)
 // ====================================================================
 // advanced string
 
-const std::string GetMultiline(string endLine) {
+const std::string GetMultiline(string ) {
 	std::string result(""); // Taken from OT_CLI_ReadUntilEOF
 	while (true) {
 		std::string input_line("");
