@@ -384,13 +384,13 @@ cLoggerStream & cLogger::write_stream(int level, const std::string & channel ) {
 		if (mStream) { // TODO now disabling mStream also disables writting to any channel
 			_dbg_dbg("Selecting output...");
 			cLoggerStream & output = SelectOutput(level,channel);
-			_dbg_dbg("Selecting output... done, output=" << (void*)(&output));
+            std::thread::id this_id = std::this_thread::get_id();
+            output << "{" << Thread2Number(this_id) << "}";
+            _dbg_dbg("Selecting output... done, output=" << (void*)(&output));
 			#if defined(OS_TYPE_WINDOWS)
 			output << windows_stream(level);
 			#endif
 			output << icon(level) << ' ';
-			std::thread::id this_id = std::this_thread::get_id();
-			output << "{" << Thread2Number(this_id) << "}";
 			auto nicePid = Pid2Number(getpid());
 			if (nicePid>0) output << " {p" << nicePid << "}";
 			output << ' ';
