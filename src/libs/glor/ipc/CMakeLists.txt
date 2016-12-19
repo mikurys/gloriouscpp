@@ -10,14 +10,17 @@ file(GLOB glor_ipc_sources # All files in directory:
 )
 
 add_library (glor_ipc STATIC ${glor_ipc_sources})
-add_dependencies (glor_ipc 
-	${Boost_SYSTEM_LIBRARY} 
+add_dependencies (glor_ipc
+	${Boost_SYSTEM_LIBRARY}
 	pthread)
+if (CYGWIN)
+target_link_libraries (glor_ipc
+	glor_system)
+else()
 target_link_libraries (glor_ipc
 	glor_system
-	rt
-	)
+	rt)
+endif()
 set_target_properties (glor_ipc PROPERTIES OUTPUT_NAME "glor_ipc")
 
 # target_link_libraries (upnpc-static ${LDLIBS}) # to add used libs
-
