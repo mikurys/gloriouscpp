@@ -30,7 +30,7 @@
 #define MAKE_STRUCT_NAME(NAME) private: static std::string GetObjectName() { return #NAME; } public:
 
 // define this to debug the debug system itself:
-// #define opt_debug_debug
+#define opt_debug_debug
 
 #ifdef opt_debug_debug
 	#define _dbg_dbg(X) do { std::cerr<<"_dbg_dbg: " << OT_CODE_STAMP << " {thread=" << std::this_thread::get_id()<<"} " \
@@ -99,28 +99,9 @@ std::atomic<int> & gLoggerGuardDepth_Get(); // getter for the global singleton o
 // detect lock() error e.g. recursive limit
 // detect stream e.g. operator<< error
 
-
-#define _debug_level(LEVEL,VAR) do { if (_dbg_ignore< LEVEL) { \
-	_dbg_dbg("WRITE DEBUG: LEVEL="<<LEVEL<<" VAR: " << VAR ); \
-	auto level=LEVEL; short int part=0; \
-	try { \
-		std::lock_guard<std::recursive_mutex> mutex_guard( glor::system::gLoggerGuard ); \
-		part=1; \
-		try { \
-			++glor::system::gLoggerGuardDepth_Get(); \
-			/* int counter = glor::system::gLoggerGuardDepth_Get();  if (counter!=1) gCurrentLogger.write_stream(100,"")<<"DEBUG-ERROR: recursion, counter="<<counter<<gCurrentLogger.endline(); */ \
-			gCurrentLogger.write_stream(LEVEL,"") << glor::system::get_current_time() << ' ' << OT_CODE_STAMP << ' ' << VAR << gCurrentLogger.endline()  << glor::system::cLoggerCommit() ; \
-			part=9; \
-		} catch(...) { \
-			gCurrentLogger.write_stream(std::max(level,90),"") << glor::system::get_current_time() << ' ' << OT_CODE_STAMP << ' ' << "(ERROR IN DEBUG)" << gCurrentLogger.endline(); \
-			--glor::system::gLoggerGuardDepth_Get(); throw ; \
-		} \
-		--glor::system::gLoggerGuardDepth_Get(); \
-	} catch(...) { if (part<8) gCurrentLogger.write_stream(100,"")<<"DEBUG-ERROR: problem in debug mechanism e.g. in locking." <<gCurrentLogger.endline();   throw ; } \
-	} } while(0)
-
 // info for code below: oss object is normal stack variable, using it does not need lock protection
-#define _debug_level_c(CHANNEL,LEVEL,VAR) do { if (_dbg_ignore< LEVEL) { \
+
+#define _debug_level_c_log(LOGGER,CHANNEL,LEVEL,VAR) do { if (_dbg_ignore< LEVEL) { \
 	_dbg_dbg("WRITE DEBUG: LEVEL="<<LEVEL<<" CHANNEL="<<CHANNEL<<" VAR: " << VAR ); \
 	auto level=LEVEL; short int part=0; \
 	try { \
@@ -129,58 +110,73 @@ std::atomic<int> & gLoggerGuardDepth_Get(); // getter for the global singleton o
 		try { \
 			++glor::system::gLoggerGuardDepth_Get(); \
 			std::ostringstream oss; \
-			oss << glor::system::get_current_time() << ' ' << OT_CODE_STAMP << ' ' << VAR << gCurrentLogger.endline() << std::flush; \
+			oss << glor::system::get_current_time() << ' ' << OT_CODE_STAMP << ' ' << VAR << LOGGER.endline() << std::flush; \
 			std::string as_string = oss.str(); \
 			_dbg_dbg("START will write to log LEVEL="<<LEVEL<<" to CHANNEL="<<CHANNEL<<" as_string="<<as_string); \
-/* int counter = glor::system::gLoggerGuardDepth_Get();  if (counter!=1) gCurrentLogger.write_stream(100,"")<<"DEBUG-ERROR: recursion, counter="<<counter<<gCurrentLogger.endline(); */ \
-			gCurrentLogger.write_stream(LEVEL,""     ) << as_string << gCurrentLogger.endline() << glor::system::cLoggerCommit() ; \
-			gCurrentLogger.write_stream(LEVEL,CHANNEL) << as_string << gCurrentLogger.endline() << glor::system::cLoggerCommit() ; \
+/* int counter = glor::system::gLoggerGuardDepth_Get();  if (counter!=1) LOGGER.write_stream(100,"")<<"DEBUG-ERROR: recursion, counter="<<counter<<LOGGER.endline(); */ \
+			LOGGER.write_stream(LEVEL,""     ) << as_string << LOGGER.endline() << ::glor::system::cLoggerCommit() ; \
+			LOGGER.write_stream(LEVEL,CHANNEL) << as_string << LOGGER.endline() << ::glor::system::cLoggerCommit() ; \
 			_dbg_dbg("DONE will write to log LEVEL="<<LEVEL<<" to CHANNEL="<<CHANNEL<<" as_string="<<as_string); \
 			part=9; \
 		} catch(...) { \
-			gCurrentLogger.write_stream(std::max(level,90),CHANNEL) << glor::system::get_current_time() << ' ' << OT_CODE_STAMP << ' ' << "(ERROR IN DEBUG)" << gCurrentLogger.endline(); \
+			LOGGER.write_stream(std::max(level,90),CHANNEL) << glor::system::get_current_time() << ' ' << OT_CODE_STAMP << ' ' << "(ERROR IN DEBUG)" << LOGGER.endline(); \
 			--glor::system::gLoggerGuardDepth_Get(); throw ; \
 		} \
 		--glor::system::gLoggerGuardDepth_Get(); \
-	} catch(...) { if (part<8) gCurrentLogger.write_stream(100,CHANNEL)<<"DEBUG-ERROR: problem in debug mechanism e.g. in locking." <<gCurrentLogger.endline();   throw ; } \
+	} catch(...) { if (part<8) LOGGER.write_stream(100,CHANNEL)<<"DEBUG-ERROR: problem in debug mechanism e.g. in locking." << LOGGER.endline();   throw ; } \
 	} } while(0)
 
+#define _debug_level_c(CHANNEL,LEVEL,VAR) _debug_level_c_log( ::glor::system::cLogger::singleton() , CHANNEL,LEVEL,VAR)
+#define _debug_level(LEVEL,VAR) _debug_level_c_log( ::glor::system::cLogger::singleton() , "",LEVEL,VAR)
+
 // Numerical values of the debug levels - are defined here as const ints. Full name (with namespace) given for clarity.
-extern const int _debug_level_nr_dbg3;
-extern const int _debug_level_nr_dbg2;
-extern const int _debug_level_nr_dbg1;
-extern const int _debug_level_nr_info;
-extern const int _debug_level_nr_note;
-extern const int _debug_level_nr_stat;
-extern const int _debug_level_nr_fact;
-extern const int _debug_level_nr_goal;
-extern const int _debug_level_nr_mark;
-extern const int _debug_level_nr_warn;
-extern const int _debug_level_nr_erro;
+constexpr int _debug_level_nr_dbg3=20;
+constexpr int _debug_level_nr_dbg2=30;
+constexpr int _debug_level_nr_dbg1=40;
+constexpr int _debug_level_nr_info=50;
+constexpr int _debug_level_nr_note=60;
+constexpr int _debug_level_nr_stat=80;
+constexpr int _debug_level_nr_fact=100;
+constexpr int _debug_level_nr_goal=120;
+constexpr int _debug_level_nr_mark=150;
+constexpr int _debug_level_nr_warn=200;
+constexpr int _debug_level_nr_erro=230;
 
-#define _dbg3(VAR) _debug_level( glor::system::_debug_level_nr_dbg3,VAR) // details - most detailed
-#define _dbg2(VAR) _debug_level( glor::system::_debug_level_nr_dbg2,VAR) // details - a bit more important
-#define _dbg1(VAR) _debug_level( glor::system::_debug_level_nr_dbg1,VAR) // details - more important
-#define _info(VAR) _debug_level( glor::system::_debug_level_nr_info,VAR) // information
-#define _note(VAR) _debug_level( glor::system::_debug_level_nr_note,VAR) // more interesting information
-#define _stat(VAR) _debug_level( glor::system::_debug_level_nr_stat,VAR) // statistics, that could be interesting to user a bit
-#define _fact(VAR) _debug_level( glor::system::_debug_level_nr_fact,VAR) // interesting events that could be interesting even for user, for logical/business things
-#define _goal(VAR) _debug_level( glor::system::_debug_level_nr_goal,VAR) // interesting events that are very intersting for user, e.g. are goal of the program
-#define _mark(VAR) _debug_level( glor::system::_debug_level_nr_mark,VAR) // marked actions (e.g. for developer)
-#define _warn(VAR) _debug_level( glor::system::_debug_level_nr_warn,VAR) // some problems
-#define _erro(VAR) _debug_level( glor::system::_debug_level_nr_erro,VAR) // errors
+#define _dbg3(VAR) _debug_level( ::glor::system::_debug_level_nr_dbg3,VAR) // details - most detailed
+#define _dbg2(VAR) _debug_level( ::glor::system::_debug_level_nr_dbg2,VAR) // details - a bit more important
+#define _dbg1(VAR) _debug_level( ::glor::system::_debug_level_nr_dbg1,VAR) // details - more important
+#define _info(VAR) _debug_level( ::glor::system::_debug_level_nr_info,VAR) // information
+#define _note(VAR) _debug_level( ::glor::system::_debug_level_nr_note,VAR) // more interesting information
+#define _stat(VAR) _debug_level( ::glor::system::_debug_level_nr_stat,VAR) // statistics, that could be interesting to user a bit
+#define _fact(VAR) _debug_level( ::glor::system::_debug_level_nr_fact,VAR) // interesting events that could be interesting even for user, for logical/business things
+#define _goal(VAR) _debug_level( ::glor::system::_debug_level_nr_goal,VAR) // interesting events that are very intersting for user, e.g. are goal of the program
+#define _mark(VAR) _debug_level( ::glor::system::_debug_level_nr_mark,VAR) // marked actions (e.g. for developer)
+#define _warn(VAR) _debug_level( ::glor::system::_debug_level_nr_warn,VAR) // some problems
+#define _erro(VAR) _debug_level( ::glor::system::_debug_level_nr_erro,VAR) // errors
 
-#define _dbg3_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_dbg3, VAR) // details - most detailed
-#define _dbg2_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_dbg2, VAR) // details - a bit more important
-#define _dbg1_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_dbg1, VAR) // details - more important
-#define _info_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_info, VAR) // information
-#define _note_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_note, VAR) // more interesting information
-#define _stat_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_stat, VAR)
-#define _fact_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_fact, VAR) // interesting events that could be interesting even for user, for logical/business things
-#define _goal(VAR) _debug_level( glor::system::_debug_level_nr_goal,VAR) // interesting events that are very intersting for user, e.g. are goal of the program
-#define _mark_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_mark, VAR) // marked actions (e.g. for developer)
-#define _warn_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_warn, VAR) // some problems
-#define _erro_c(C,VAR) _debug_level_c(C, glor::system::_debug_level_nr_erro, VAR) // errors
+#define _dbg3_c(C,VAR) _debug_level_c(C, ::glor::system::_debug_level_nr_dbg3, VAR) // details - most detailed
+#define _dbg2_c(C,VAR) _debug_level_c(C, ::glor::system::_debug_level_nr_dbg2, VAR) // details - a bit more important
+#define _dbg1_c(C,VAR) _debug_level_c(C, ::glor::system::_debug_level_nr_dbg1, VAR) // details - more important
+#define _info_c(C,VAR) _debug_level_c(C, ::glor::system::_debug_level_nr_info, VAR) // information
+#define _note_c(C,VAR) _debug_level_c(C, ::glor::system::_debug_level_nr_note, VAR) // more interesting information
+#define _stat_c(C,VAR) _debug_level_c(C, ::glor::system::_debug_level_nr_stat, VAR)
+#define _fact_c(C,VAR) _debug_level_c(C, ::glor::system::_debug_level_nr_fact, VAR) // interesting events that could be interesting even for user, for logical/business things
+#define _goal_c(C,VAR) _debug_level_c(C, ::glor::system::_debug_level_nr_goal,VAR) // interesting events that are very intersting for user, e.g. are goal of the program
+#define _mark_c(C,VAR) _debug_level_c(C, ::glor::system::_debug_level_nr_mark, VAR) // marked actions (e.g. for developer)
+#define _warn_c(C,VAR) _debug_level_c(C, ::glor::system::_debug_level_nr_warn, VAR) // some problems
+#define _erro_c(C,VAR) _debug_level_c(C, ::glor::system::_debug_level_nr_erro, VAR) // errors
+
+#define _dbg3_c_log(LOGGER,C,VAR) _debug_level_c_log(LOGGER, C, ::glor::system::_debug_level_nr_dbg3, VAR) // details - most detailed
+#define _dbg2_c_log(LOGGER,C,VAR) _debug_level_c_log(LOGGER,C, ::glor::system::_debug_level_nr_dbg2, VAR) // details - a bit more important
+#define _dbg1_c_log(LOGGER,C,VAR) _debug_level_c_log(LOGGER,C, ::glor::system::_debug_level_nr_dbg1, VAR) // details - more important
+#define _info_c_log(LOGGER,C,VAR) _debug_level_c_log(LOGGER,C, ::glor::system::_debug_level_nr_info, VAR) // information
+#define _note_c_log(LOGGER,C,VAR) _debug_level_c_log(LOGGER,C, ::glor::system::_debug_level_nr_note, VAR) // more interesting information
+#define _stat_c_log(LOGGER,C,VAR) _debug_level_c_log(LOGGER,C, ::glor::system::_debug_level_nr_stat, VAR)
+#define _fact_c_log(LOGGER,C,VAR) _debug_level_c_log(LOGGER,C, ::glor::system::_debug_level_nr_fact, VAR) // interesting events that could be interesting even for user, for logical/business things
+#define _goal_c_log(LOGGER,C,VAR) _debug_level_c_log(LOGGER,C, ::glor::system::_debug_level_nr_goal,VAR) // interesting events that are very intersting for user, e.g. are goal of the program
+#define _mark_c_log(LOGGER,C,VAR) _debug_level_c_log(LOGGER,C, ::glor::system::_debug_level_nr_mark, VAR) // marked actions (e.g. for developer)
+#define _warn_c_log(LOGGER,C,VAR) _debug_level_c_log(LOGGER,C, ::glor::system::_debug_level_nr_warn, VAR) // some problems
+#define _erro_c_log(LOGGER,C,VAR) _debug_level_c_log(LOGGER,C, ::glor::system::_debug_level_nr_erro, VAR) // errors
 
 // lock // because of VAR
 #define _scope_debug_level_c(CHANNEL,LEVEL,VAR) \
@@ -251,6 +247,8 @@ class cLogger {
 
 		std::string icon(int level) const; ///< returns "icon" for given debug level. It is text, might include color controll characters
 		std::string endline() const; ///< returns string to be written at end of message
+
+		static cLogger & singleton(); ///< Get the single object of main logger.
 
 	protected:
 		bool mUseRegularFiles;
@@ -631,13 +629,13 @@ class value_init {
 template <class T, T INIT>
 value_init<T, INIT>::value_init() :	data(INIT) { }
 
+
 } // namespace system
 
 } // namespace glor
 
 
 // global namespace
-extern glor::system::cLogger gCurrentLogger; ///< The current main logger. Usually do not use it directly, instead use macros like _dbg1 etc
 
 std::string GetObjectName(); ///< Method to return name of current object; To use in debug; Can be shadowed in your classes. (Might be not used currently)
 

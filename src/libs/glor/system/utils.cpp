@@ -49,17 +49,6 @@ INJECT_OT_COMMON_USING_NAMESPACE_COMMON_1 // <=== namespaces
 // ====================================================================
 
 // Numerical values of the debug levels - see hpp
-const int _debug_level_nr_dbg3=20;
-const int _debug_level_nr_dbg2=30;
-const int _debug_level_nr_dbg1=40;
-const int _debug_level_nr_info=50;
-const int _debug_level_nr_note=60;
-const int _debug_level_nr_stat=80;
-const int _debug_level_nr_fact=100;
-const int _debug_level_nr_goal=120;
-const int _debug_level_nr_mark=150;
-const int _debug_level_nr_warn=200;
-const int _debug_level_nr_erro=230;
 
 // ====================================================================
 
@@ -276,7 +265,7 @@ cDebugScopeGuard::cDebugScopeGuard() : mLevel(-1) {
 
 cDebugScopeGuard::~cDebugScopeGuard() {
 	if (mLevel != -1) {
-		gCurrentLogger.write_stream(mLevel,mChan) << mMsg << " ... end" << gCurrentLogger.endline(); // TODO << std::flush;
+		cLogger::singleton().write_stream(mLevel,mChan) << mMsg << " ... end" << cLogger::singleton().endline(); // TODO << std::flush;
 	}
 }
 
@@ -358,6 +347,11 @@ cLogger::~cLogger() {
 	}
 }
 
+cLogger & cLogger::singleton() { ///< Get the single object of main logger.
+	static cLogger obj; // <--- C++11 guarantees this will be constructed exactly once (even if this function is called concurrently
+	return obj; // reference to static object
+}
+
 void cLogger::SetStreamBroken() {
 	SetStreamBroken("(no additional details about this problem)");
 }
@@ -390,7 +384,7 @@ cLoggerStream & cLogger::write_stream(int level, const std::string & channel ) {
             output << "{" << Thread2Number(this_id) << "}";
             _dbg_dbg("Selecting output... done, output=" << (void*)(&output));
 			#if defined(OS_TYPE_WINDOWS)
-			output << windows_stream(level);
+			output << icon(level) << windows_stream(level);
 			#endif
 			output << icon(level) << ' ';
 			auto nicePid = Pid2Number(getpid());
@@ -399,6 +393,7 @@ cLoggerStream & cLogger::write_stream(int level, const std::string & channel ) {
 			return output; // <--- return
 		} else _dbg_dbg("Not writting: No mStream");
 	} else _dbg_dbg("Not writting: Too low level level="<<level<<" not >= mLevel="<<mLevel);
+	_dbg_dbg("... returning nullstream");
 	return g_nullstream;
 }
 
@@ -526,31 +521,32 @@ void cLogger::setDebugLevel(int level) {
 std::string cLogger::icon(int level) const {
 	// TODO replan to avoid needles converting back and forth char*, string etc
 
-	using namespace zkr;
-    #if defined(OS_TYPE_POSIX)
+	using namespace zkr; // colors
+
+  #if defined(OS_TYPE_POSIX)
 	if (level >= 100) return cc::back::lightred     + ToStr(cc::fore::lightyellow) + ToStr("ERROR ") + ToStr(cc::fore::lightyellow) + " " ;
 	if (level >=  90) return cc::back::lightyellow  + ToStr(cc::fore::black) + ToStr("Warn  ") + ToStr(cc::fore::red)+ " " ;
 	if (level >=  80) return cc::back::lightmagenta + ToStr(cc::fore::black) + ToStr("MARK  "); //+ zkr::cc::console + ToStr(cc::fore::lightmagenta)+ " ";
-    if (level >=  75) return cc::back::lightyellow + ToStr(cc::fore::black) + ToStr("FACT  ") + zkr::cc::console + ToStr(cc::fore::lightyellow)+ " ";
+	if (level >=  75) return cc::back::lightyellow + ToStr(cc::fore::black) + ToStr("FACT  ") + zkr::cc::console + ToStr(cc::fore::lightyellow)+ " ";
 	if (level >=  70) return cc::fore::green    + ToStr("Note  ");
 	if (level >=  50) return cc::fore::cyan   + ToStr("info  ");
-	if (level >=  40) return cc::fore::lightwhite    + ToStr("dbg   ");
-	if (level >=  30) return cc::fore::lightblue   + ToStr("dbg   ");
-	if (level >=  20) return cc::fore::blue    + ToStr("dbg   ");
+	if (level >=  40) return cc::fore::lightwhite    + ToStr("dbg3  ");
+	if (level >=  30) return cc::fore::lightblue   + ToStr("dbg2  ");
+	if (level >=  20) return cc::fore::blue    + ToStr("dbg1  ");
 
-    #elif defined(OS_TYPE_WINDOWS)
-    if (level >= 100) return ToStr("ERROR ");
-    if (level >=  90) return ToStr("Warn  ");
-    if (level >=  80) return ToStr("MARK  ");
-    if (level >=  75) return ToStr("FACT  ");
-    if (level >=  70) return ToStr("Note  ");
-    if (level >=  50) return ToStr("info  ");
-    if (level >=  40) return ToStr("dbg   ");
-    if (level >=  30) return ToStr("dbg   ");
-    if (level >=  20) return ToStr("dbg   ");
-    #endif
+	#elif defined(OS_TYPE_WINDOWS)
+	if (level >= 100) return ToStr("ERROR ");
+	if (level >=  90) return ToStr("Warn  ");
+	if (level >=  80) return ToStr("MARK  ");
+	if (level >=  75) return ToStr("FACT  ");
+	if (level >=  70) return ToStr("Note  ");
+	if (level >=  50) return ToStr("info  ");
+	if (level >=  40) return ToStr("dbg3  ");
+	if (level >=  30) return ToStr("dbg2  ");
+	if (level >=  20) return ToStr("dbg1  ");
+	#endif
 
-	return "  ";
+	return "(noicon)  ";
 }
 
 std::string cLogger::endline() const {
@@ -566,7 +562,7 @@ int cLogger::Thread2Number(const std::thread::id id) {
 	if (found == mThread2Number.end()) { // new one
 		mThread2Number_Biggest++;
 		mThread2Number[id] = mThread2Number_Biggest;
-		_info_c("dbg/main", "This is a new thread (used in debug), thread id="<<id); // can cause some recursion
+		_info_c_log( (*this) ,"dbg/main", "This is a new thread (used in debug), thread id="<<id); // can cause some recursion
 		return mThread2Number_Biggest;
 	} else {
 		return mThread2Number[id];
@@ -578,15 +574,12 @@ int cLogger::Pid2Number(const t_anypid id) {
 	if (found == mPid2Number.end()) { // new one
 		mPid2Number_Biggest++;
 		mPid2Number[id] = mPid2Number_Biggest;
-		_info_c("dbg/main", "This is a new process (used in debug), process pid="<<id); // can cause some recursion
+		_info_c_log( (*this) ,"dbg/main", "This is a new process (used in debug), process pid="<<id); // can cause some recursion
 		return mPid2Number_Biggest;
 	} else {
 		return mPid2Number[id];
 	}
 }
-
-// ====================================================================
-// object gCurrentLogger is defined later - in global namespace below
 
 
 // ====================================================================
@@ -858,5 +851,5 @@ std::string GetObjectName() {
 
 // ====================================================================
 
-glor::system::cLogger gCurrentLogger;
 std::mutex g_protect_ctime_unsafe_functions;
+

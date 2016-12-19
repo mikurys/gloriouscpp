@@ -1,7 +1,6 @@
 #include <string>
 #include <iostream>
 #include <thread>
-#define opt_debug_debug
 
 #include <glor/system/utils.hpp>
 
@@ -78,9 +77,13 @@ void test() {
 
 
 int main() {
-    glor::example::c_man jacek("Jacek");
+	_erro("Test-error");
+	return 0;
+
     _mark("This is mark");
     _info("This is info");
+    return 0;
+
     _warn("This is warn");
     _erro("This is erro\n\n\nerro message continue");
     _fact("This is fact");
@@ -88,6 +91,8 @@ int main() {
     _dbg1("This is dbg1");
     _dbg2("This is dbg2");
     _dbg3("This is dbg3");
+
+    glor::example::c_man jacek("Jacek");
 
     std::thread t1([&jacek](){jacek.bar(10, 15);});
     std::thread t2([](){_mark("This is mark");});
