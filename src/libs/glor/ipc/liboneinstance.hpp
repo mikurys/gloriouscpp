@@ -1,5 +1,5 @@
 #pragma once
-#ifndef __INCLUDED_H_liboneinstance_hpp 
+#ifndef __INCLUDED_H_liboneinstance_hpp
 #define __INCLUDED_H_liboneinstance_hpp 1
 
 #include <thread>
@@ -40,12 +40,12 @@ const std::string library_version=nOneInstance_library_version_major;
 // what type of instance do want, e.g. one per system, or per user, or per directory:
 typedef enum { e_range_system=100, e_range_user, e_range_maindir } t_instance_range;
 
-// what is the situation of given instance e.g. inst1, inst2, inst3 - it can be dead, or was not locked/existing 
+// what is the situation of given instance e.g. inst1, inst2, inst3 - it can be dead, or was not locked/existing
 // and we won the race to it, or we lost (we lost the race, or it was alive etc)
 typedef enum { e_instance_i_won=50, e_instance_i_lost=60, e_instance_seems_dead=70, e_instance_unknown=1 } t_instance_outcome;
 
-// TODO C++11 constructor tag forwarding 
-		
+// TODO C++11 constructor tag forwarding
+
 class cMyNamedMutex : public msg_mutex { // public boost::interprocess::named_mutex {
 	private:
 		const std::string m_name; // copy of the mutex-name

@@ -1,4 +1,4 @@
-/// @author rfree 
+/// @author rfree
 /// @brief run small internal tests (e.g. to be used by the developers of this library for quick testing)
 
 #include "utils.hpp"

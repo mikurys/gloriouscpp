@@ -25,7 +25,7 @@
 	//#error "You requested to turn off terminal colors (CFG_WITH_TERMCOLORS), however currently they are hardcoded (this option to turn them off is not yet implemented)."
 #endif
 
-///Macros related to automatic deduction of class name etc; 
+///Macros related to automatic deduction of class name etc;
 #define MAKE_CLASS_NAME(NAME) private: static std::string GetObjectName() { return #NAME; }
 #define MAKE_STRUCT_NAME(NAME) private: static std::string GetObjectName() { return #NAME; } public:
 
@@ -460,14 +460,14 @@ namespace nDetail {
 } // namespace nDetail
 
 
-struct cLoggerCommit { 
+struct cLoggerCommit {
 	cLoggerCommit() = default;
 	cLoggerCommit(const cLoggerCommit &) = default;
 	};
 
 /*
 std::ostream & operator<<(std::ostream &str , const cLoggerCommit & obj) {
-// TODO 
+// TODO
 	return str;
 }
 */
@@ -483,12 +483,12 @@ class cLoggerStream {
 	public:
 		cLoggerStream(const std::string & filename);
 		virtual ~cLoggerStream() = default;
-		
+
 		virtual bool PrintIsNotEmpty();
 		virtual void Print(const std::string & str);
-		
-		template <class T> 
-		cLoggerStream& operator << ( const T & obj) { 
+
+		template <class T>
+		cLoggerStream& operator << ( const T & obj) {
 			using n_stringable::operator<< ;
 			m_oss.reset(new std::ostringstream);
 			if (PrintIsNotEmpty()) {
@@ -502,9 +502,9 @@ class cLoggerStream {
 				m_oss.reset(nullptr);
 				return *this;
 		}
-		
+
 		virtual cLoggerStream& operator << ( const cLoggerCommit & obj);
-		
+
 		virtual void UseRegularFiles();
 	protected:
 		cLoggerStream() = default;
@@ -600,7 +600,7 @@ map<TK,TV> operator+(const map<TK,TV> &a, const map<TK,TV> &b) {
 // ====================================================================
 // Multi-threading
 #define USE_GLOR_SYS_PROTECT_CTIME_LOCK extern std::mutex g_protect_ctime_unsafe_functions
-#define GLOR_SYS_PROTECT_CTIME_LOCK g_protect_ctime_unsafe_functions.lock(); do { } while(0) 
+#define GLOR_SYS_PROTECT_CTIME_LOCK g_protect_ctime_unsafe_functions.lock(); do { } while(0)
 #define GLOR_SYS_PROTECT_CTIME_UNLOCK g_protect_ctime_unsafe_functions.unlock(); do { } while(0)
 
 #ifndef BOOST_HAS_THREADS
@@ -611,7 +611,7 @@ map<TK,TV> operator+(const map<TK,TV> &a, const map<TK,TV> &b) {
 std::string libglorious_info();
 
 /**
-@brief Special type that on creation will be initialized to have value INIT given as template argument. 
+@brief Special type that on creation will be initialized to have value INIT given as template argument.
 Might be usefull e.g. to express in the declaration of class what will be the default value of member variable
 See also http://www.boost.org/doc/libs/1_56_0/libs/utility/value_init.htm
 Probably not needed when using boost in your project.
@@ -641,7 +641,7 @@ extern glor::system::cLogger gCurrentLogger; ///< The current main logger. Usual
 
 std::string GetObjectName(); ///< Method to return name of current object; To use in debug; Can be shadowed in your classes. (Might be not used currently)
 
-const extern int _dbg_ignore; ///< the global _dbg_ignore, but local code (blocks, classes etc) you could shadow it in your code blocks, 
+const extern int _dbg_ignore; ///< the global _dbg_ignore, but local code (blocks, classes etc) you could shadow it in your code blocks,
 // to override debug compile-time setting for given block/class, e.g. to disable debug in one of your methods or increase it there.
 // Or to make it runtime by providing a class normal member and editing it in runtime
 

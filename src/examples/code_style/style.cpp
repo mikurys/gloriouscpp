@@ -42,11 +42,11 @@ class c_man : public c_human {
 
 c_man::c_man(const string& name) : m_beer(0), m_name(name) { } // trivial = oneliner
 
-c_man::c_man(const string& name, int age, int money, int luck) : 
-	m_beer( age + money*luck ), 
-	m_money(money), 
-	m_name(name) 
-{ 
+c_man::c_man(const string& name, int age, int money, int luck) :
+	m_beer( age + money*luck ),
+	m_money(money),
+	m_name(name)
+{
 	cout << "Created human (advanced)" << endl;
 
 	if (age > 18) {
@@ -61,7 +61,7 @@ c_man::c_man(const string& name, int age, int money, int luck) :
 
 void c_man::foo() { }
 
-void c_man::bar(int x, int y) { 
+void c_man::bar(int x, int y) {
 	int x_new = x;
 	int c = x_new + y;
 	_info("c = " << c);
@@ -73,7 +73,7 @@ void test() {
 	c_man the_other_guy("James");
 }
 
-} // namespace 
+} // namespace
 } // namespace
 
 

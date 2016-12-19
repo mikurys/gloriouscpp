@@ -140,7 +140,7 @@ std::atomic<int> & gLoggerGuardDepth_Get() {
 
 	if (!once) { // initialize it once
 		once=1;
-		gLoggerGuardDepth=0;	
+		gLoggerGuardDepth=0;
 	}
 
 	return gLoggerGuardDepth; // global, atomic counter
@@ -196,7 +196,7 @@ char cFilesystemUtils::GetDirSeparatorInter() {
 string cFilesystemUtils::FileInternalToSystem(const std::string &name) {
 	string ret;
 	ret.resize(name.size());
-	std::replace_copy(name.begin(), name.end(), ret.begin(), 
+	std::replace_copy(name.begin(), name.end(), ret.begin(),
 		GetDirSeparatorInter() , GetDirSeparatorSys());
 	return ret;
 }
@@ -204,7 +204,7 @@ string cFilesystemUtils::FileInternalToSystem(const std::string &name) {
 string cFilesystemUtils::FileSystemToInternal(const std::string &name) {
 	string ret;
 	ret.reserve(name.size());
-	std::replace_copy(name.begin(), name.end(), ret.begin(), 
+	std::replace_copy(name.begin(), name.end(), ret.begin(),
 		GetDirSeparatorSys() , GetDirSeparatorInter());
 	return ret;
 }
@@ -264,16 +264,16 @@ bool cFilesystemUtils::CreateDirTree(const std::string & dir, bool only_below) {
 
 namespace nDetail {
 
-struct channel_use_info { ///< feedback information about using (e.g. opening) given debug channel - used internally by logging system 
+struct channel_use_info { ///< feedback information about using (e.g. opening) given debug channel - used internally by logging system
 /// TODO not yet used in code
 /// e.g. used to write into channel net/in/all that given message was a first logged message from never-before-logged thread or PID etc
 	bool m_was_interesting; ///< anything interesting happened when using the channel?
 	std::vector<std::string> m_extra_msg; ///< any additional messages about this channel use
-};	
+};
 
 cDebugScopeGuard::cDebugScopeGuard() : mLevel(-1) {
 }
-	
+
 cDebugScopeGuard::~cDebugScopeGuard() {
 	if (mLevel != -1) {
 		gCurrentLogger.write_stream(mLevel,mChan) << mMsg << " ... end" << gCurrentLogger.endline(); // TODO << std::flush;
@@ -293,7 +293,7 @@ cLoggerStream::cLoggerStream(const std::string & filename)
 :
 	m_use_regular_files(false),
 	m_filename(filename)
-{	
+{
 }
 
 void cLoggerStream::UseRegularFiles() {
@@ -301,7 +301,7 @@ void cLoggerStream::UseRegularFiles() {
 }
 
 cLoggerStream& cLoggerStream::operator << ( const cLoggerCommit & ) {
-	
+
 	if (! m_oss) m_oss.reset(new std::ostringstream);
 
 	return *this;
@@ -347,7 +347,7 @@ mPid2Number_Biggest(0)
 	// this is here, because it could be using logging itself to log creation of first thread/PID etc
 	Thread2Number( std::this_thread::get_id() ); // convert current id to short number, useful to reserve a number so that main thread is usually called 1
 	Pid2Number( getpid() ); // add this proces ID as first one
-	
+
 }
 
 cLogger::~cLogger() {
@@ -432,8 +432,8 @@ void cLogger::OpenNewChannel_(const std::string & channel) { // channel=="net/sl
 		fname_system = cFilesystemUtils::FileInternalToSystem(fname); // <-
 	}
 	else { // there is a directory eg channel=="net/sleep"
-		// net/sleep 
-		//    ^----- last_split	
+		// net/sleep
+		//    ^----- last_split
 		string dir = GetLogBaseDir() + cFilesystemUtils::GetDirSeparatorInter() + channel.substr(0, last_split);
 		string basefile = channel.substr(last_split+1) + ".log";
 		string fname = dir + cFilesystemUtils::GetDirSeparatorInter() + basefile;
@@ -453,11 +453,11 @@ void cLogger::OpenNewChannel_(const std::string & channel) { // channel=="net/sl
 
 cLoggerStream & cLogger::SelectOutput(int , const std::string & channel) noexcept {
 	try {
-		if (mIsBroken) { 
+		if (mIsBroken) {
 			_dbg_dbg("The stream is broken mIsBroken="<<mIsBroken<<" so will return backup stream");
 			return *mStreamBrokenDebug;
 		}
-		if (channel=="") { 
+		if (channel=="") {
 			_dbg_dbg("No channel given (channel="<<channel<<") so will return main stream");
 			return *mStream;
 		}
@@ -476,8 +476,8 @@ cLoggerStream & cLogger::SelectOutput(int , const std::string & channel) noexcep
 		_dbg_dbg("Found the stream file for channel="<<channel<<" as the_stream_ptr="<<the_stream_ptr);
 		ASRT(the_stream_ptr);
 		return *the_stream_ptr; // <--- RETURN
-	} 
-	catch (std::exception &except) { 
+	}
+	catch (std::exception &except) {
 		SetStreamBroken( OT_CODE_STAMP + " Got exception: " + ToStr(except.what()) );
 		_dbg_dbg("Exception! Returning broken stream");
 		return *mStreamBrokenDebug;
@@ -835,7 +835,7 @@ string stringToColor(const string &hash) {
 
 std::string libglorious_info() {
 	std::string ret;
-	#ifdef GLOR_SYS_CONFIG_CTIME_NEEDS_LOCKING 
+	#ifdef GLOR_SYS_CONFIG_CTIME_NEEDS_LOCKING
 		ret += "ctime needs locking protection";
 	#endif
 	return ret;

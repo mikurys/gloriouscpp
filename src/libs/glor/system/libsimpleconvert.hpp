@@ -1,6 +1,6 @@
 
 #pragma once
-#ifndef __INCLUDED_H_libsimpleconvert_hpp 
+#ifndef __INCLUDED_H_libsimpleconvert_hpp
 #define __INCLUDED_H_libsimpleconvert_hpp 1
 
 #include <vector>

@@ -7,6 +7,6 @@
 namespace glor {
 namespace ipc {
 
-} // namespace 
-} // namespace 
+} // namespace
+} // namespace
 

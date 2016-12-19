@@ -12,7 +12,7 @@
 
 class warning_already_unlocked : public std::exception { };
 
-/** 
+/**
 @description a mutex that is safe (e.g. against double unlock, double lock), and can pass a messae
 @note this is safe way, because: http://lists.boost.org/boost-users/2012/03/73888.php
 */
@@ -49,7 +49,7 @@ public:
 	bool timed_lock(const boost::posix_time::seconds &sec); // return true when locks
 
 	bool is_locked();
-	
+
 	// message-like api:
 	void lock_msg(const t_msg& msg); // lock mutex, block thread if mutex is locked
 	t_msg unlock_msg(); // safe unlock, if mutex is unlocked does nothing

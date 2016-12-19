@@ -30,7 +30,7 @@
 
 namespace nOneInstance {
 
-	
+
 typedef std::string utf8;
 // TODO !!! mv function
 void wstrToUtf8(utf8 &dest, const std::wstring& src){
@@ -60,7 +60,7 @@ void wstrToUtf8(utf8 &dest, const std::wstring& src){
             dest.push_back('?');
     }
 }
-	
+
 std::string GetLibraryVersionFull() {
 	return "TODO"; // TODO
 }
@@ -75,7 +75,7 @@ cMyNamedMutex::cMyNamedMutex(boost::interprocess::open_or_create_t, const char *
 : msg_mutex(boost::interprocess::open_or_create_t(), name, permissions, msglen), m_name(name), m_own(false)
 { }
 
-cMyNamedMutex::cMyNamedMutex(boost::interprocess::open_only_t, const char * name, size_t msglen) 
+cMyNamedMutex::cMyNamedMutex(boost::interprocess::open_only_t, const char * name, size_t msglen)
 : msg_mutex(boost::interprocess::open_only_t(), name, msglen), m_name(name), m_own(false)
 { }
 
@@ -130,7 +130,7 @@ std::ostream& operator<<(std::ostream &out, const cMyNamedMutex & obj) {
 cInstancePingable::cInstancePingable(const std::string &base_mutex_name, const boost::interprocess::permissions & mutex_perms)
 : m_run_flag(false), m_go_flag(false), m_hang_pings(false),
 m_mutex_name(BaseNameToPingName(base_mutex_name)), m_mutex_perms(mutex_perms)
-{ 
+{
 	_info("Constructed cInstancePingable for m_mutex_name="<<m_mutex_name);
 }
 
@@ -140,7 +140,7 @@ cInstancePingable::~cInstancePingable() {
 
 	if (m_thread) { // if thread runs (not null)
 		_info("Joining the thread");
-		m_thread->join(); 
+		m_thread->join();
 		_info("Joining the thread - done");
 	}
 
@@ -161,7 +161,7 @@ void cInstancePingable::PongLoop() {
 	while (!m_go_flag) {
 		std::this_thread::sleep_for(std::chrono::milliseconds(time_latency_wakeup));
 	}
-	
+
 	_info("PongLoop - begin for m_mutex_name="<<m_mutex_name);
 	const int recreate_trigger = 1000; // how often to recreate the object
 	int need_recreate = recreate_trigger; // should we (re)create the mutex object now - counter. start at high level to create it initially
@@ -176,8 +176,8 @@ void cInstancePingable::PongLoop() {
 		++need_recreate; // so we will recreate it from time to time
 		if (need_recreate >= recreate_trigger) {
 			_info("pong: CREATING the object now for m_mutex_name="<<m_mutex_name);
-			m_pong_obj.reset( 
-				new cMyNamedMutex ( boost::interprocess::open_or_create, m_mutex_name.c_str(), m_mutex_perms ) 
+			m_pong_obj.reset(
+				new cMyNamedMutex ( boost::interprocess::open_or_create, m_mutex_name.c_str(), m_mutex_perms )
 			);
 			_info("pong: CREATED object has name: " << m_pong_obj->GetName() );
 			need_recreate=false;
@@ -187,13 +187,13 @@ void cInstancePingable::PongLoop() {
 			_info("unlocking: "<<m_pong_obj->GetName());
 			m_pong_obj->unlock(); ///< this signals that we are alive <--- ***
 			_info("***PONG*** - unlock worked now");
-		} 
+		}
 		catch(warning_already_unlocked) {
 			_info("... was already unlocked");
 		}
-		catch(...) { 
+		catch(...) {
 			_info("WARNING: unlocking failed - exception: need to re-create the object probably");
-			need_recreate = recreate_trigger; 
+			need_recreate = recreate_trigger;
 		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(time_latency_pong)); // sleep TODO config
@@ -214,7 +214,7 @@ void cInstancePingable::Run() {
 void cInstancePingable::HangPings(bool hang) {
 	_info("Ok, " + std::string( hang ? "" : "UN-" ) + "hanging the pings here in " << ((void*)this) );
 	m_hang_pings=hang;
-} 
+}
 
 
 
@@ -230,7 +230,7 @@ cInstanceObject::~cInstanceObject() {
 
 bool cInstanceObject::BeTheOnlyInstance() {
 	int instance=1;
-	t_instance_outcome outcome = e_instance_unknown; 
+	t_instance_outcome outcome = e_instance_unknown;
 	while (!(  outcome==e_instance_i_won  ||  outcome==e_instance_i_lost )) { // untill we win or lose
 		outcome = TryToBecomeInstance(instance);
 		if (outcome==e_instance_seems_dead) {
@@ -246,7 +246,7 @@ bool cInstanceObject::PingInstance( const std::string &base_name, const boost::i
 	const int dead_threshold = 10; // TODO config how sure we must be that other thread is dead, how many times (number) it must fail to reply
 	const int ping_wait_ms = 500; // TODO config how long we wait for one reply
 
-	std::unique_ptr< cMyNamedMutex > ping_mutex( 
+	std::unique_ptr< cMyNamedMutex > ping_mutex(
 		new cMyNamedMutex(
 			boost::interprocess::open_or_create,
 //			"name1",
@@ -258,7 +258,7 @@ bool cInstanceObject::PingInstance( const std::string &base_name, const boost::i
 	int dead_confidence; // are we sure no one is replying
 	bool firstlocked=0; // did we locked it even once
 
-	dead_confidence=0; 
+	dead_confidence=0;
 	_info("Locking Ping first time. ping_mutex=" << *ping_mutex);
 	while (!firstlocked) {
 		//firstlocked = ping_mutex->timed_lock(boost::posix_time::second_clock::universal_time() + boost::posix_time::milliseconds(ping_wait_ms * dead_threshold));
@@ -272,14 +272,14 @@ bool cInstanceObject::PingInstance( const std::string &base_name, const boost::i
 				_info("Giving up - seems dead, dead_confidence="<<dead_confidence);
 				return false; // can not get even one lock - so we do not see even one unlock - so other instance seems dead
 			}
-		} 
+		}
 	}
 	// lock it once (so it waits for open spot to request ping) - unless it's stucked for very long
-	// because if it's very long then the instance hanged (and someone else locked it now or previously) 
+	// because if it's very long then the instance hanged (and someone else locked it now or previously)
 	// so to await infinite wait
 	_info("***PING*** is sent: " << *ping_mutex);
 
-	bool relocked = false; 
+	bool relocked = false;
 
 	long int pings_sent=0;
 	dead_confidence=0;
@@ -290,7 +290,7 @@ bool cInstanceObject::PingInstance( const std::string &base_name, const boost::i
 			_info("Trying to relock ping_mutex" << *ping_mutex);
 			relocked = ping_mutex->try_lock();
 			_info("relocked = " << relocked );
-		} catch(...) { } 
+		} catch(...) { }
 		if (relocked) {
 			_info("***PONG*** received - thread is ALIVE");
 			// TODO or the cleanup process recreated empty lock? better test once more
@@ -298,7 +298,7 @@ bool cInstanceObject::PingInstance( const std::string &base_name, const boost::i
 		}
 		_info("No-reply to ping");
 		dead_confidence++; // seems dead
-		
+
 		std::this_thread::sleep_for(std::chrono::milliseconds(ping_wait_ms));
 	}
 	_info("Instance seems dead after pings_sent="<<pings_sent);
@@ -308,7 +308,7 @@ bool cInstanceObject::PingInstance( const std::string &base_name, const boost::i
 t_instance_outcome cInstanceObject::TryToBecomeInstance(int inst) { // test instance, tries to become it
 	_info("Trying instance inst="<<inst);
 
-	const std::string igrp_name = std::string("instancegroup_") 
+	const std::string igrp_name = std::string("instancegroup_")
 		+ m_program_name // testprogram
 		+ ( (m_range==e_range_user) ? ("_user_n_"+cMyNamedMutex::EscapeMutexNameWithLen(GetUserNameStr())) : ( "_user_ANY" ) ) // testprogram_alice  testprogram
 		+ ( (m_range==e_range_maindir) ? ("_dir_n_"+cMyNamedMutex::EscapeMutexNameWithLen(GetDirName())) : ( "_dir_ANY" )   )
@@ -329,12 +329,12 @@ t_instance_outcome cInstanceObject::TryToBecomeInstance(int inst) { // test inst
 	// we created this mutex or it existed
 
 	bool curr_locked = m_curr_mutex->try_lock_msg(str_to_vec("La"));// GetProcessIdentification() ) );
-	if (curr_locked) { // we locked it! 
+	if (curr_locked) { // we locked it!
 		_info("WE BECOME INSTANCE: Created and locked the Mc - we became the instance at inst="<<inst);
 		m_curr_mutex->SetOwnership(true); // I own this mutex e.g. M5
 
 		// I am probably the leader
-		
+
 		// ... TODO ... ping all lower numbers are they responding after all to ping ...
 
 
@@ -352,7 +352,7 @@ t_instance_outcome cInstanceObject::TryToBecomeInstance(int inst) { // test inst
 		_info("The other instance is dead!");
 		return e_instance_seems_dead;
 	}
-	
+
 	return e_instance_i_lost;
 }
 

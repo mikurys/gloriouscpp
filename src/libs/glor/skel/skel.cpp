@@ -7,6 +7,6 @@
 namespace glor {
 namespace skel {
 
-} // namespace 
-} // namespace 
+} // namespace
+} // namespace
 
