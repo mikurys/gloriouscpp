@@ -4,7 +4,7 @@ add_executable(glorius_use_log
 add_dependencies(glorius_use_log
 		glor_system)
 
-if (CYGWIN)
+if (CYGWIN OR APPLE)
 target_link_libraries(glorius_use_log
 	glor_system
 	pthread

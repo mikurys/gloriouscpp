@@ -8,7 +8,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 message (STATUS "boost include  ${Boost_INCLUDE_DIRS}")
 message (STATUS "boost root  ${BOOST_ROOT}")
 
-if (CYGWIN)
+if (CYGWIN OR APPLE)
 target_link_libraries(code_style
 	glor_system
 	pthread

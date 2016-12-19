@@ -13,7 +13,7 @@ add_library (glor_ipc STATIC ${glor_ipc_sources})
 add_dependencies (glor_ipc
 	${Boost_SYSTEM_LIBRARY}
 	pthread)
-if (CYGWIN)
+if (CYGWIN OR APPLE)
 target_link_libraries (glor_ipc
 	glor_system)
 else()
