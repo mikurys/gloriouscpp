@@ -739,10 +739,11 @@ bool checkPrefix(const string & str, char prefix) {
 
 void cEnvUtils::GetTmpTextFile() {
 	// TODO make this name configurable (depending on project)
+	// TODO make this use own directory, and chmod 700 it
 	char filename[] = "/tmp/otshellutils_text.XXXXXX";
 	fd = mkstemp(filename);
 	if (fd == -1) {
-		_erro("Can't create the file: " << filename);
+		_erro("Can't create the file: " << filename << " for temporary");
 		return;
 	}
 	mFilename = filename;

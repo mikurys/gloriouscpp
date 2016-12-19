@@ -6,6 +6,8 @@
 #include <vector>
 #include <map>
 
+namespace n_stringable {
+
 template <typename T> std::ostream& operator<<(std::ostream &ostr , const std::vector<T> & tab) {
 	using namespace std;
 	bool first=0; // first was done yet
@@ -27,4 +29,6 @@ template <typename TKey, typename TVal> std::ostream& operator<<(std::ostream &o
 	}
 	return ostr;
 }
+
+} // namespace n_stringable
 

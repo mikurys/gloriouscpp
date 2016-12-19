@@ -10,6 +10,8 @@
 
 #include "ccolor.hpp"
 
+#include "ostream_operator.hpp"
+
 #include "lib_common1.hpp"
 #ifdef __unix
 	#include <unistd.h>
@@ -96,6 +98,7 @@ std::atomic<int> & gLoggerGuardDepth_Get(); // getter for the global singleton o
 // TODO more debug of the debug system:
 // detect lock() error e.g. recursive limit
 // detect stream e.g. operator<< error
+
 
 #define _debug_level(LEVEL,VAR) do { if (_dbg_ignore< LEVEL) { \
 	_dbg_dbg("WRITE DEBUG: LEVEL="<<LEVEL<<" VAR: " << VAR ); \
@@ -486,6 +489,7 @@ class cLoggerStream {
 		
 		template <class T> 
 		cLoggerStream& operator << ( const T & obj) { 
+			using n_stringable::operator<< ;
 			m_oss.reset(new std::ostringstream);
 			if (PrintIsNotEmpty()) {
 				*m_oss << obj;
