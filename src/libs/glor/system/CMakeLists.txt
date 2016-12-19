@@ -10,7 +10,7 @@ file(GLOB glor_system_sources # All files in directory:
 )
 
 add_library (glor_system STATIC ${glor_system_sources})
-if (CYGWIN)
+if (CYGWIN OR APPLE)
         target_link_libraries (glor_system pthread ${Boost_SYSTEM_LIBRARY} )
 else()
         target_link_libraries (glor_system pthread ${Boost_SYSTEM_LIBRARY} rt)
