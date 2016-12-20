@@ -25,7 +25,9 @@ include_directories(${GLO_INCLUDE_DIR})
 add_subdirectory(src/libs/glor)
 add_subdirectory(src/examples)
 
-add_custom_target(run
+if(NOT TARGET run)
+        add_custom_target(run
 		COMMAND ./bin/code_style
 		DEPENDS ./bin/code_style
 		WORKING_DIRECTORY ./)
+endif()
