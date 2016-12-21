@@ -11,8 +11,7 @@ file(GLOB glor_ipc_sources # All files in directory:
 
 add_library (glor_ipc STATIC ${glor_ipc_sources})
 add_dependencies (glor_ipc
-	${Boost_SYSTEM_LIBRARY}
-	pthread)
+	${Boost_SYSTEM_LIBRARY})
 if (CYGWIN OR APPLE)
 target_link_libraries (glor_ipc
 	glor_system)

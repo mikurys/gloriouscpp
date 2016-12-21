@@ -13,7 +13,12 @@ if (NOT Boost_FOUND)
   message (WARNING "Could not find Boost libraries, please make sure you have installed Boost, libboost-all-dev or the equivalent")
 endif()
 
-set(CMAKE_CXX_FLAGS  "-std=c++11 -W -Wall -pedantic")
+if(NOT MSVC)
+	set(CMAKE_CXX_FLAGS  "-std=c++11 -W -Wall -pedantic")
+else()
+	set(CMAKE_CXX_FLAGS  "-std=c++11 -Wall -pedantic")
+endif()
+
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS} -g3 -O0")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
 set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)

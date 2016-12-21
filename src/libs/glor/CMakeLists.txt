@@ -1,7 +1,11 @@
 message (STATUS "Build libs")
 cmake_minimum_required(VERSION 2.6)
 
-set(CMAKE_CXX_FLAGS  "-std=c++11 -W -Werror --pedantic -g3 -O0")
+if(NOT MSVC)
+	set(CMAKE_CXX_FLAGS  "-std=c++11 -W -Werror --pedantic -g3 -O0")
+else()
+	set(CMAKE_CXX_FLAGS  "-std=c++11 --pedantic -g3 -O0")
+endif()
 
 add_subdirectory(system)
 add_subdirectory(ipc)

@@ -1,3 +1,5 @@
-
-set(CMAKE_CXX_FLAGS  "-std=c++11 -W -Werror --pedantic -g3 -O0")
-
+if(NOT MSVC)
+	set(CMAKE_CXX_FLAGS  "-std=c++11 -W -Werror --pedantic -g3 -O0")
+else()
+	set(CMAKE_CXX_FLAGS  "-std=c++11 --pedantic -g3 -O0")
+endif()

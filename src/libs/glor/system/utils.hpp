@@ -9,6 +9,7 @@
 #define INCLUDE_GLORIOUS_SYSTEM_UTILS
 
 #include "ccolor.hpp"
+#include <algorithm>
 
 #include "ostream_operator.hpp"
 
@@ -119,7 +120,8 @@ std::atomic<int> & gLoggerGuardDepth_Get(); // getter for the global singleton o
 			_dbg_dbg("DONE will write to log LEVEL="<<LEVEL<<" to CHANNEL="<<CHANNEL<<" as_string="<<as_string); \
 			part=9; \
 		} catch(...) { \
-			LOGGER.write_stream(std::max(level,90),CHANNEL) << glor::system::get_current_time() << ' ' << OT_CODE_STAMP << ' ' << "(ERROR IN DEBUG)" << LOGGER.endline(); \
+                        using std::max; \
+			LOGGER.write_stream(max(level,90),CHANNEL) << glor::system::get_current_time() << ' ' << OT_CODE_STAMP << ' ' << "(ERROR IN DEBUG)" << LOGGER.endline(); \
 			--glor::system::gLoggerGuardDepth_Get(); throw ; \
 		} \
 		--glor::system::gLoggerGuardDepth_Get(); \
@@ -282,8 +284,6 @@ class cLogger {
 		int Pid2Number(const t_anypid id); ///<  convert the system's PID id into a nice short our id; make one if new thread
 };
 
-
-
 // ====================================================================
 // vector debug
 
@@ -345,7 +345,6 @@ void DbgDisplayMap(const std::map<T, T2> &m, const std::string &delim=" ") {
 	}
 }
 
-
 template <class T>
 void DbgDisplayVectorEndl(const std::vector<T> &v, const std::string &delim=" ") {
 	DbgDisplayVector(v,delim);
@@ -362,7 +361,6 @@ vector<string> WordsThatMatch(const std::string & sofar, const vector<string> & 
 char GetLastChar(const std::string & str);
 std::string GetLastCharIf(const std::string & str); // TODO unicode?
 std::string EscapeString(const std::string &s);
-
 
 template <class T>
 std::string DbgVector(const std::vector<T> &v, const std::string &delim="|") {
@@ -431,7 +429,6 @@ class cFilesystemUtils { // if we do not want to use boost in given project (or 
 		static string FileSystemToInternal(const std::string &name); ///< converts from system file name string to internal file name string
 };
 
-
 /// @brief utils to e.g. edit a file from console
 /// @author rfree (maintainer)
 class cEnvUtils {
@@ -452,11 +449,9 @@ void generateAnswers (std::fstream & file, string command, vector<string> &compl
 
 // ====================================================================
 
-
 namespace nDetail {
 	struct channel_use_info;
 } // namespace nDetail
-
 
 struct cLoggerCommit {
 	cLoggerCommit() = default;
@@ -582,7 +577,6 @@ map<TK,TV> operator+(const map<TK,TV> &a, const map<TK,TV> &b) {
 	return ret;
 }
 
-
 } // glor::system::nOper
 
 // ====================================================================
@@ -593,7 +587,6 @@ map<TK,TV> operator+(const map<TK,TV> &a, const map<TK,TV> &b) {
 
 // ====================================================================
 // ====================================================================
-
 
 // ====================================================================
 // Multi-threading
@@ -629,11 +622,9 @@ class value_init {
 template <class T, T INIT>
 value_init<T, INIT>::value_init() :	data(INIT) { }
 
-
 } // namespace system
 
 } // namespace glor
-
 
 // global namespace
 
@@ -645,8 +636,4 @@ const extern int _dbg_ignore; ///< the global _dbg_ignore, but local code (block
 
 #define OT_CODE_STAMP ( glor::system::ToStr("[") + glor::system::nDetail::DbgShortenCodeFileName(__FILE__) + glor::system::ToStr("+") + glor::system::ToStr(__LINE__) + glor::system::ToStr(" ") + (GetObjectName()) + glor::system::ToStr("::") + glor::system::ToStr(__FUNCTION__) + glor::system::ToStr("]"))
 
-
-
-
 #endif
-
