@@ -13,7 +13,9 @@
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-#include <unistd.h>
+#if defined __unix
+	#include <unistd.h>
+#endif
 
 #if defined _WIN32
 	#include <windows.h>

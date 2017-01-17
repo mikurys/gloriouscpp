@@ -6,7 +6,6 @@
 #include "lib_common1.hpp"
 #include "runoptions.hpp"
 
-
 namespace glor {
 namespace system {
 namespace internal_test {

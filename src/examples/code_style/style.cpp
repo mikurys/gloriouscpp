@@ -1,10 +1,19 @@
 #include <string>
 #include <iostream>
-#include <thread>
+//#include <thread>
 
 #include <glor/system/utils.hpp>
 
 using namespace glor::system;
+namespace boost
+{
+#ifdef BOOST_NO_EXCEPTIONS
+	void throw_exception(std::exception const & e) {
+		throw 11; // or whatever
+	};
+#endif
+}// namespace boost
+
 
 namespace glor {
 
@@ -31,8 +40,6 @@ class c_man : public c_human {
 		c_man(const string& name);
 		c_man(const string& name, int age, int money, int luck);
 
-		void drive_to(int max_speed);
-		void print(string str);
 };
 
 
@@ -77,6 +84,7 @@ void test() {
 
 
 int main() {
+	/*
 	_erro("Test-error");
 	return 0;
 
@@ -114,5 +122,6 @@ int main() {
     t3.join();
     t1.join();
     t2.join();
+	*/
 	return 0;
 }

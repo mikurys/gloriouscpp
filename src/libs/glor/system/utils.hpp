@@ -9,7 +9,7 @@
 #define INCLUDE_GLORIOUS_SYSTEM_UTILS
 
 #include "ccolor.hpp"
-#include <algorithm>
+#include <algorithm> // for std max
 
 #include "ostream_operator.hpp"
 
@@ -59,7 +59,7 @@ class myexception : public std::runtime_error {
 };
 
 /// @macro Use this macro INJECT_OT_COMMON_USING_NAMESPACE_COMMON_1 as a shortcut for various using std::string etc.
-INJECT_OT_COMMON_USING_NAMESPACE_COMMON_1 // <=== namespaces
+INJECT_OT_COMMON_USING_NAMESPACE_COMMON_1; // <=== namespaces
 
 // ======================================================================================
 /// text trimming functions (they do mutate the passes string); they trim based on std::isspace. also return it's reference again
@@ -120,7 +120,7 @@ std::atomic<int> & gLoggerGuardDepth_Get(); // getter for the global singleton o
 			_dbg_dbg("DONE will write to log LEVEL="<<LEVEL<<" to CHANNEL="<<CHANNEL<<" as_string="<<as_string); \
 			part=9; \
 		} catch(...) { \
-                        using std::max; \
+			using std::max; \
 			LOGGER.write_stream(max(level,90),CHANNEL) << glor::system::get_current_time() << ' ' << OT_CODE_STAMP << ' ' << "(ERROR IN DEBUG)" << LOGGER.endline(); \
 			--glor::system::gLoggerGuardDepth_Get(); throw ; \
 		} \

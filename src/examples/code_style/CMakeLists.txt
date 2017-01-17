@@ -13,6 +13,10 @@ target_link_libraries(code_style
 	glor_system
 	pthread
 	${Boost_SYSTEM_LIBRARY})
+elseif(MSVC)
+target_link_libraries(code_style
+	glor_system
+	${Boost_SYSTEM_LIBRARY})
 else()
 target_link_libraries(code_style
 	glor_system

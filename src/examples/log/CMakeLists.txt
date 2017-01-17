@@ -9,6 +9,10 @@ target_link_libraries(glorius_use_log
 	glor_system
 	pthread
 	${Boost_SYSTEM_LIBRARY})
+elseif(MSVC)
+target_link_libraries(glorius_use_log
+	glor_system
+	${Boost_SYSTEM_LIBRARY})
 else()
 target_link_libraries(glorius_use_log
 	glor_system
