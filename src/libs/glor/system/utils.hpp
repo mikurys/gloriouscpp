@@ -59,7 +59,7 @@ class myexception : public std::runtime_error {
 };
 
 /// @macro Use this macro INJECT_OT_COMMON_USING_NAMESPACE_COMMON_1 as a shortcut for various using std::string etc.
-INJECT_OT_COMMON_USING_NAMESPACE_COMMON_1; // <=== namespaces
+INJECT_OT_COMMON_USING_NAMESPACE_COMMON_1 // <=== namespaces
 
 // ======================================================================================
 /// text trimming functions (they do mutate the passes string); they trim based on std::isspace. also return it's reference again

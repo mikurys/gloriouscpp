@@ -7,7 +7,7 @@
 
 namespace glor {
 
-	INJECT_OT_COMMON_USING_NAMESPACE_COMMON_1; // <=== namespaces
+	INJECT_OT_COMMON_USING_NAMESPACE_COMMON_1 // <=== namespaces
 
 // (no debug - this is the default)
 // +nodebug (no debug)
@@ -61,9 +61,6 @@ void cRunOptions::Normalize() {
 	}
 }
 
-
 cRunOptions gRunOptions; // (extern)
 
 } // namespace OT
-
-

@@ -9,6 +9,10 @@ file(GLOB glor_skel_sources # All files in directory:
 	"*.cpp"
 )
 
+if(MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DWIN32 /D_WINDOWS /W3 /GR /EHsc /MDd -DRELEASEMODE=1")
+endif()
+
 add_library (glor_skel STATIC ${glor_skel_sources})
 set_target_properties (glor_skel PROPERTIES OUTPUT_NAME "glor_skel")
 
