@@ -43,6 +43,64 @@
 
 namespace glor {
 namespace system {
+#if defined(_WIN32) || defined(__CYGWIN__)
+#include <windows.h>
+//#include <winbase.h>
+//#include <wincon.h>
+#include <stringapiset.h>
+#undef _assert
+#include <cstring>
+
+void set_windows_console_utf8(HANDLE console_handle) {
+	CONSOLE_FONT_INFOEX cfi = {sizeof(cfi)};
+	GetCurrentConsoleFontEx(console_handle, FALSE, &cfi);
+	wchar_t font_name[32] = L"Lucida Console";
+	std::memcpy(cfi.FaceName, font_name, 32);
+	SetCurrentConsoleFontEx(console_handle, FALSE, &cfi);
+	// SetConsoleOutputCP function not works
+	std::system("chcp 65001 > nul");
+	bool chcp_ret = (GetConsoleOutputCP() == CP_UTF8);
+	if (!chcp_ret) {
+		throw::std::runtime_error("SetConsoleOutputCP error, nr: " + std::to_string(GetLastError()));
+	}
+}
+#endif
+
+const bool g_is_windows_console = []() {
+	#if defined(_WIN32) || defined(__CYGWIN__)
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		DWORD n = 0;
+		bool ret = WriteConsole(hConsole, nullptr, 0, &n, nullptr);
+		if (ret) { // if windows console
+			set_windows_console_utf8(hConsole);
+		}
+		return ret;
+	#else
+		return false;
+	#endif
+}();
+
+#include <cassert>
+void write_to_console(const std::string& obj) {
+	if (g_is_windows_console) {
+		#if defined(_WIN32) || defined(__CYGWIN__)
+		std::ostringstream oss;
+		oss << obj;
+		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+		const std::string str = oss.str();
+		wchar_t buf[1024];
+		DWORD write_bytes = 0;
+		write_bytes = MultiByteToWideChar(CP_UTF8, 0,
+						str.c_str(), str.size()+1, // +1 for '\0'
+						buf, sizeof(buf));
+		::std::wcerr << buf;
+		#else
+			assert(false); // windows console detected on non windows OS
+		#endif
+	}
+	else
+		::std::cerr << obj;
+}
 
 INJECT_OT_COMMON_USING_NAMESPACE_COMMON_1 // <=== namespaces
 

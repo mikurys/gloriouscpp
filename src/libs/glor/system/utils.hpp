@@ -31,7 +31,7 @@
 #define MAKE_STRUCT_NAME(NAME) private: static std::string GetObjectName() { return #NAME; } public:
 
 // define this to debug the debug system itself:
-#define opt_debug_debug
+//#define opt_debug_debug
 
 #ifdef opt_debug_debug
 	#define _dbg_dbg(X) do { std::cerr<<"_dbg_dbg: " << OT_CODE_STAMP << " {thread=" << std::this_thread::get_id()<<"} " \
@@ -48,6 +48,9 @@
 namespace glor {
 
 namespace system {
+
+extern const bool g_is_windows_console;
+void write_to_console(const std::string& obj);
 
 /// @brief general based for my runtime errors
 class myexception : public std::runtime_error {
@@ -115,8 +118,8 @@ std::atomic<int> & gLoggerGuardDepth_Get(); // getter for the global singleton o
 			std::string as_string = oss.str(); \
 			_dbg_dbg("START will write to log LEVEL="<<LEVEL<<" to CHANNEL="<<CHANNEL<<" as_string="<<as_string); \
 /* int counter = glor::system::gLoggerGuardDepth_Get();  if (counter!=1) LOGGER.write_stream(100,"")<<"DEBUG-ERROR: recursion, counter="<<counter<<LOGGER.endline(); */ \
-			LOGGER.write_stream(LEVEL,""     ) << as_string << LOGGER.endline() << ::glor::system::cLoggerCommit() ; \
-			LOGGER.write_stream(LEVEL,CHANNEL) << as_string << LOGGER.endline() << ::glor::system::cLoggerCommit() ; \
+			/*LOGGER.write_stream(LEVEL,""     ) << as_string << LOGGER.endline() << ::glor::system::cLoggerCommit() ;*/ \
+			LOGGER.write_stream(LEVEL,CHANNEL) << as_string << ::glor::system::cLoggerCommit() ; \
 			_dbg_dbg("DONE will write to log LEVEL="<<LEVEL<<" to CHANNEL="<<CHANNEL<<" as_string="<<as_string); \
 			part=9; \
 		} catch(...) { \
@@ -490,7 +493,10 @@ class cLoggerStream {
 				Print(s);
 			}
 			else {
-				std::cout << obj;
+				//std::cout << obj;
+				*m_oss << obj;
+				string s = m_oss->str();
+				write_to_console(s);
 			}
 				m_oss.reset(nullptr);
 				return *this;
